@@ -4,6 +4,11 @@ import 'package:flutter/gestures.dart';
 import 'package:flame/flame.dart';
 import 'package:flame/game.dart';
 
+import 'package:langaw/view.dart';
+import 'package:langaw/views/home-view.dart';
+import 'package:langaw/views/lost-view.dart';
+
+import 'package:langaw/components/start-button.dart';
 import 'package:langaw/components/backyard.dart';
 import 'package:langaw/components/fly.dart';
 import 'package:langaw/components/house-fly.dart';
@@ -19,6 +24,11 @@ class LangawGame extends Game {
 	List<Fly> flies;
 	Random rnd;
 
+	View activeView = View.home;
+	HomeView homeView;
+	LostView lostView;
+	StartButton startButton;
+
 	LangawGame() {
 		initialize();
 	}
@@ -29,6 +39,9 @@ class LangawGame extends Game {
 		resize(await Flame.util.initialDimensions());
 
 		background = Backyard(this);
+		homeView = HomeView(this);
+		lostView = LostView(this);
+		startButton = StartButton(this);
 		spawnFly();
 	}
 
@@ -36,6 +49,12 @@ class LangawGame extends Game {
 		background.render(canvas);
 
 		flies.forEach((Fly fly) => fly.render(canvas));
+		if (activeView == View.home) homeView.render(canvas);
+		if (activeView == View.lost) lostView.render(canvas);
+
+		if (activeView == View.home || activeView == View.lost) {
+			startButton.render(canvas);
+		}
 	}
 
   void update(double t) {
@@ -49,11 +68,28 @@ class LangawGame extends Game {
 	}
 
 	void onTapDown(TapDownDetails d) {
-		flies.forEach((Fly fly) {
-			if (fly.flyRect.contains(d.globalPosition)) {
-				fly.onTapDown();
+		bool isHandled = false;
+		bool didHitAFly = false;
+
+		if (!isHandled && startButton.rect.contains(d.globalPosition)) {
+			if (activeView == View.home || activeView == View.lost) {
+				startButton.onTapDown();
+				isHandled = true;
 			}
-		});
+		}
+
+		if (!isHandled) {
+			flies.forEach((Fly fly) {
+				if (fly.flyRect.contains(d.globalPosition)) {
+					fly.onTapDown();
+					isHandled = true;
+					didHitAFly = true;
+				}
+			});
+			if (activeView == View.playing && !didHitAFly) {
+				activeView = View.lost;
+			}
+		}
 	}
 
 	void spawnFly() {
