@@ -12,10 +12,11 @@ import 'package:langaw/views/lost-view.dart';
 import 'package:langaw/views/help-view.dart';
 import 'package:langaw/views/credits-view.dart';
 
-import 'package:langaw/components/start-button.dart';
-import 'package:langaw/components/credits-button.dart';
-import 'package:langaw/components/help-button.dart';
 import 'package:langaw/components/backyard.dart';
+import 'package:langaw/components/start-button.dart';
+import 'package:langaw/components/help-button.dart';
+import 'package:langaw/components/credits-button.dart';
+import 'package:langaw/components/score-display.dart';
 import 'package:langaw/components/fly.dart';
 import 'package:langaw/components/house-fly.dart';
 import 'package:langaw/components/agile-fly.dart';
@@ -27,12 +28,14 @@ class LangawGame extends Game {
   Size screenSize;
 	double tileSize;
 	Random rnd;
+	int score;
 
 	Backyard background;
 	List<Fly> flies;
 	StartButton startButton;
 	HelpButton helpButton;
 	CreditsButton creditsButton;
+	ScoreDisplay scoreDisplay;
 
 	FlySpawner spawner;
 
@@ -48,6 +51,7 @@ class LangawGame extends Game {
 	}
 
 	void initialize() async {
+		score = 0;
 		flies = List<Fly>();
 		rnd = Random();
 		resize(await Flame.util.initialDimensions());
@@ -56,6 +60,7 @@ class LangawGame extends Game {
 		startButton = StartButton(this);
 		helpButton = HelpButton(this);
 		creditsButton = CreditsButton(this);
+		scoreDisplay = ScoreDisplay(this);
 
 		spawner = FlySpawner(this);
 		homeView = HomeView(this);
@@ -77,12 +82,14 @@ class LangawGame extends Game {
 		}
 		if (activeView == View.help) helpView.render(canvas);
 		if (activeView == View.credits) creditsView.render(canvas);
+		if (activeView == View.playing) scoreDisplay.render(canvas);
 	}
 
   void update(double t) {
 		flies.forEach((Fly fly) => fly.update(t));
 		flies.removeWhere((Fly fly) => fly.isOffScreen);
 		spawner.update(t);
+		if (activeView == View.playing) scoreDisplay.update(t);
 	}
 
   void resize(Size size) {
