@@ -4,11 +4,15 @@ import 'package:flutter/gestures.dart';
 import 'package:flame/flame.dart';
 import 'package:flame/game.dart';
 
+import 'package:langaw/controllers/spawner.dart';
+
 import 'package:langaw/view.dart';
 import 'package:langaw/views/home-view.dart';
 import 'package:langaw/views/lost-view.dart';
 
 import 'package:langaw/components/start-button.dart';
+import 'package:langaw/components/credits-button.dart';
+import 'package:langaw/components/help-button.dart';
 import 'package:langaw/components/backyard.dart';
 import 'package:langaw/components/fly.dart';
 import 'package:langaw/components/house-fly.dart';
@@ -24,10 +28,14 @@ class LangawGame extends Game {
 	List<Fly> flies;
 	Random rnd;
 
+	FlySpawner spawner;
 	View activeView = View.home;
 	HomeView homeView;
 	LostView lostView;
+
 	StartButton startButton;
+	HelpButton helpButton;
+	CreditsButton creditsButton;
 
 	LangawGame() {
 		initialize();
@@ -39,10 +47,13 @@ class LangawGame extends Game {
 		resize(await Flame.util.initialDimensions());
 
 		background = Backyard(this);
+		startButton = StartButton(this);
+		helpButton = HelpButton(this);
+		creditsButton = CreditsButton(this);
+
+		spawner = FlySpawner(this);
 		homeView = HomeView(this);
 		lostView = LostView(this);
-		startButton = StartButton(this);
-		spawnFly();
 	}
 
   void render(Canvas canvas) {
@@ -55,11 +66,15 @@ class LangawGame extends Game {
 		if (activeView == View.home || activeView == View.lost) {
 			startButton.render(canvas);
 		}
+
+		helpButton.render(canvas);
+		creditsButton.render(canvas);
 	}
 
   void update(double t) {
 		flies.forEach((Fly fly) => fly.update(t));
 		flies.removeWhere((Fly fly) => fly.isOffScreen);
+		spawner.update(t);
 	}
 
   void resize(Size size) {
@@ -88,6 +103,22 @@ class LangawGame extends Game {
 			});
 			if (activeView == View.playing && !didHitAFly) {
 				activeView = View.lost;
+			}
+		}
+
+		// help button
+		if (!isHandled && helpButton.rect.contains(d.globalPosition)) {
+			if (activeView == View.home || activeView == View.lost) {
+				helpButton.onTapDown();
+				isHandled = true;
+			}
+		}
+
+		// credits button
+		if (!isHandled && creditsButton.rect.contains(d.globalPosition)) {
+			if (activeView == View.home || activeView == View.lost) {
+				creditsButton.onTapDown();
+				isHandled = true;
 			}
 		}
 	}
