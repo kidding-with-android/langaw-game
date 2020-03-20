@@ -9,6 +9,8 @@ import 'package:langaw/controllers/spawner.dart';
 import 'package:langaw/view.dart';
 import 'package:langaw/views/home-view.dart';
 import 'package:langaw/views/lost-view.dart';
+import 'package:langaw/views/help-view.dart';
+import 'package:langaw/views/credits-view.dart';
 
 import 'package:langaw/components/start-button.dart';
 import 'package:langaw/components/credits-button.dart';
@@ -24,18 +26,22 @@ import 'package:langaw/components/macho-fly.dart';
 class LangawGame extends Game {
   Size screenSize;
 	double tileSize;
-	Backyard background;
-	List<Fly> flies;
 	Random rnd;
 
-	FlySpawner spawner;
-	View activeView = View.home;
-	HomeView homeView;
-	LostView lostView;
-
+	Backyard background;
+	List<Fly> flies;
 	StartButton startButton;
 	HelpButton helpButton;
 	CreditsButton creditsButton;
+
+	FlySpawner spawner;
+
+	View activeView = View.home;
+	HomeView homeView;
+	LostView lostView;
+	HelpView helpView;
+	CreditsView creditsView;
+
 
 	LangawGame() {
 		initialize();
@@ -54,6 +60,8 @@ class LangawGame extends Game {
 		spawner = FlySpawner(this);
 		homeView = HomeView(this);
 		lostView = LostView(this);
+		helpView = HelpView(this);
+		creditsView = CreditsView(this);
 	}
 
   void render(Canvas canvas) {
@@ -62,13 +70,13 @@ class LangawGame extends Game {
 		flies.forEach((Fly fly) => fly.render(canvas));
 		if (activeView == View.home) homeView.render(canvas);
 		if (activeView == View.lost) lostView.render(canvas);
-
 		if (activeView == View.home || activeView == View.lost) {
 			startButton.render(canvas);
+      helpButton.render(canvas);
+      creditsButton.render(canvas);
 		}
-
-		helpButton.render(canvas);
-		creditsButton.render(canvas);
+		if (activeView == View.help) helpView.render(canvas);
+		if (activeView == View.credits) creditsView.render(canvas);
 	}
 
   void update(double t) {
@@ -84,25 +92,12 @@ class LangawGame extends Game {
 
 	void onTapDown(TapDownDetails d) {
 		bool isHandled = false;
-		bool didHitAFly = false;
 
-		if (!isHandled && startButton.rect.contains(d.globalPosition)) {
-			if (activeView == View.home || activeView == View.lost) {
-				startButton.onTapDown();
-				isHandled = true;
-			}
-		}
-
+		// dialog boxes
 		if (!isHandled) {
-			flies.forEach((Fly fly) {
-				if (fly.flyRect.contains(d.globalPosition)) {
-					fly.onTapDown();
-					isHandled = true;
-					didHitAFly = true;
-				}
-			});
-			if (activeView == View.playing && !didHitAFly) {
-				activeView = View.lost;
+			if (activeView == View.help || activeView == View.credits) {
+				activeView = View.home;
+				isHandled = true;
 			}
 		}
 
@@ -119,6 +114,29 @@ class LangawGame extends Game {
 			if (activeView == View.home || activeView == View.lost) {
 				creditsButton.onTapDown();
 				isHandled = true;
+			}
+		}
+
+		// start button
+		if (!isHandled && startButton.rect.contains(d.globalPosition)) {
+			if (activeView == View.home || activeView == View.lost) {
+				startButton.onTapDown();
+				isHandled = true;
+			}
+		}
+
+		// flies
+		if (!isHandled) {
+			bool didHitAFly = false;
+			flies.forEach((Fly fly) {
+				if (fly.flyRect.contains(d.globalPosition)) {
+					fly.onTapDown();
+					isHandled = true;
+					didHitAFly = true;
+				}
+			});
+			if (activeView == View.playing && !didHitAFly) {
+				activeView = View.lost;
 			}
 		}
 	}
