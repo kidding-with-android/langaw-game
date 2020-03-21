@@ -3,6 +3,7 @@ import 'dart:math';
 import 'package:flutter/gestures.dart';
 import 'package:flame/flame.dart';
 import 'package:flame/game.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 import 'package:langaw/controllers/spawner.dart';
 
@@ -17,6 +18,7 @@ import 'package:langaw/components/start-button.dart';
 import 'package:langaw/components/help-button.dart';
 import 'package:langaw/components/credits-button.dart';
 import 'package:langaw/components/score-display.dart';
+import 'package:langaw/components/highscore-display.dart';
 import 'package:langaw/components/fly.dart';
 import 'package:langaw/components/house-fly.dart';
 import 'package:langaw/components/agile-fly.dart';
@@ -29,6 +31,7 @@ class LangawGame extends Game {
 	double tileSize;
 	Random rnd;
 	int score;
+	final SharedPreferences storage;
 
 	Backyard background;
 	List<Fly> flies;
@@ -36,6 +39,7 @@ class LangawGame extends Game {
 	HelpButton helpButton;
 	CreditsButton creditsButton;
 	ScoreDisplay scoreDisplay;
+	HighscoreDisplay highscoreDisplay;
 
 	FlySpawner spawner;
 
@@ -45,8 +49,7 @@ class LangawGame extends Game {
 	HelpView helpView;
 	CreditsView creditsView;
 
-
-	LangawGame() {
+	LangawGame(this.storage) {
 		initialize();
 	}
 
@@ -61,6 +64,7 @@ class LangawGame extends Game {
 		helpButton = HelpButton(this);
 		creditsButton = CreditsButton(this);
 		scoreDisplay = ScoreDisplay(this);
+		highscoreDisplay = HighscoreDisplay(this);
 
 		spawner = FlySpawner(this);
 		homeView = HomeView(this);
@@ -83,6 +87,7 @@ class LangawGame extends Game {
 		if (activeView == View.help) helpView.render(canvas);
 		if (activeView == View.credits) creditsView.render(canvas);
 		if (activeView == View.playing) scoreDisplay.render(canvas);
+		highscoreDisplay.render(canvas);
 	}
 
   void update(double t) {
