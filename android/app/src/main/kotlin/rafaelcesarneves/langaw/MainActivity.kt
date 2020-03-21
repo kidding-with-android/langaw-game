@@ -1,4 +1,4 @@
-package com.example.langaw
+package rafaelcesarneves.langaw
 
 import androidx.annotation.NonNull;
 import io.flutter.embedding.android.FlutterActivity

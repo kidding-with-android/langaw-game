@@ -25,15 +25,15 @@ class Fly {
 	double get speed => game.tileSize * 3;
 
   void render(Canvas c) {
-		if (isDead) {
-			deadSprite.renderRect(c, flyRect.inflate(2));
-		} else {
-			flyingSprite[flyingSpriteIndex.toInt()].renderRect(c, flyRect.inflate(2));
-			if (game.activeView == View.playing) {
-				callout.render(c);
-			}
-		}
-	}
+    if (isDead) {
+      deadSprite.renderRect(c, flyRect.inflate(flyRect.width / 2));
+    } else {
+      flyingSprite[flyingSpriteIndex.toInt()].renderRect(c, flyRect.inflate(flyRect.width / 2));
+      if (game.activeView == View.playing) {
+        callout.render(c);
+      }
+    }
+  }
 
   void update(double t) {
 		if (isDead) {
@@ -45,9 +45,9 @@ class Fly {
 		} else {
 			// flap de wings
 			flyingSpriteIndex += 30 * t;
-			if (flyingSpriteIndex >= 2) {
-				flyingSpriteIndex -= 2;
-			}
+      while (flyingSpriteIndex >= 2) {
+        flyingSpriteIndex -= 2;
+      }
 
 			// move the fly
 			double stepDistance = speed * t;
@@ -65,8 +65,8 @@ class Fly {
 	}
 
 	void setTargetLocation() {
-		double x = game.rnd.nextDouble() * (game.screenSize.width - (game.tileSize * 2.025));
-		double y = game.rnd.nextDouble() * (game.screenSize.height - (game.tileSize * 2.025));
+		double x = game.rnd.nextDouble() * (game.screenSize.width - (game.tileSize * 1.35));
+    double y = (game.rnd.nextDouble() * (game.screenSize.height - (game.tileSize * 2.85))) + (game.tileSize * 1.5);
 		targetLocation = Offset(x, y);
 	}
 
